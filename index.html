@@ -1,2 +1,255 @@
 # playup-app
 Jeux de carte uno et jeux divertissement action ou vérité fun à faire entre amis , famille ou même en multijoueur 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PLAYUP</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ min-height:100vh;
+ background-color:#080810;
+ background-image:
+ linear-gradient(90deg,#ffffff08 1px,transparent 1px),
+ linear-gradient(#ffffff08 1px,transparent 1px);
+ background-size:35px 35px;
+ color:white;
+ font-family:Arial,sans-serif;
+ text-align:center;
+ padding:25px 15px;
+}
+h1{
+ font-size:43px;
+ letter-spacing:5px;
+ color:white;
+ text-shadow:0 0 12px #a000ff,0 0 30px #a000ff;
+}
+.subtitle{color:#aaa}
+.card{
+ margin:35px auto;
+ max-width:440px;
+ padding:30px 15px;
+ border-radius:22px;
+ background:#11111d;
+}
+.uno{
+ border:3px solid #a000ff;
+ box-shadow:0 0 12px #a000ff, inset 0 0 15px #a000ff55;
+}
+.uno h2{color:#d49aff;text-shadow:0 0 15px #a000ff}
+.action{
+ border:3px solid #287dff;
+ box-shadow:0 0 12px #287dff;
+}
+.action h2{color:#ff4444;text-shadow:0 0 12px red}
+button{
+ border:0;
+ border-radius:13px;
+ padding:16px 25px;
+ margin:8px;
+ font-size:18px;
+ font-weight:bold;
+ color:white;
+ background:#242436;
+ cursor:pointer;
+}
+button:active{transform:scale(.97)}
+.purple{
+ background:#7900c9;
+ box-shadow:0 0 15px #a000ff;
+}
+.blue{background:#075bdc}
+.red{background:#d71938}
+input{
+ width:90%;
+ padding:15px;
+ border-radius:12px;
+ border:1px solid #777;
+ background:#191927;
+ color:white;
+ font-size:17px;
+ margin:10px;
+}
+#game{display:none}
+#result{
+ font-size:23px;
+ line-height:1.5;
+ margin:25px 5px;
+ color:#fff;
+}
+footer{color:#777;margin-top:45px}
+</style>
+</head>
+
+<body>
+
+<h1>PLAYUP</h1>
+<p class="subtitle">LE JEU COMMENCE ICI ✨</p>
+
+<div id="home">
+
+ <div class="card uno">
+  <h2>🟣 UNO</h2>
+  <p>Le jeu de cartes entre amis !</p>
+  <button class="purple" onclick="startUno()">JOUER AU UNO</button>
+ </div>
+
+ <div class="card action">
+  <h2>🔴 ACTION OU VÉRITÉ 🔵</h2>
+  <p>Qui osera relever le défi ?</p>
+  <input id="players" placeholder="Prénoms séparés par des virgules">
+  <button class="blue" onclick="startGame()">COMMENCER</button>
+ </div>
+
+</div>
+
+<div id="game" class="card action">
+ <h2>ACTION OU VÉRITÉ</h2>
+ <p id="turn"></p>
+
+ <button class="red" onclick="choose('action')">ACTION 🔥</button>
+ <button class="blue" onclick="choose('verite')">VÉRITÉ 💬</button>
+
+ <div id="result"></div>
+
+ <button onclick="nextPlayer()">JOUEUR SUIVANT ➜</button>
+ <button onclick="back()">RETOUR</button>
+</div>
+
+<div id="unoGame" class="card uno" style="display:none">
+ <h2>🟣 MINI UNO</h2>
+ <p id="unoStatus">Pioche une carte ou joue une carte de la bonne couleur ou du bon numéro.</p>
+ <h2 id="topCard">🟥 5</h2>
+ <div id="hand"></div>
+ <button class="purple" onclick="drawCard()">PIOCHER</button>
+ <button onclick="back()">RETOUR</button>
+</div>
+
+<footer>PLAYUP © 2026</footer>
+
+<script>
+let names=[];
+let current=0;
+
+const actions=[
+"Fais une imitation amusante.",
+"Chante quelques secondes d'une chanson.",
+"Danse pendant 15 secondes.",
+"Raconte une blague.",
+"Parle avec une voix rigolote pendant un tour.",
+"Fais deviner un animal en le mimant.",
+"Fais un compliment à chaque joueur.",
+"Raconte une anecdote drôle."
+];
+
+const truths=[
+"Quel est ton plus grand rêve ?",
+"Quelle est ta plus grande qualité ?",
+"Quel est ton souvenir le plus drôle ?",
+"Quelle est ta destination de rêve ?",
+"Quel talent aimerais-tu avoir ?",
+"Quel est ton film préféré ?",
+"Quelle est ta plus grande peur (sans obligation de répondre) ?",
+"Quelle est ta journée idéale ?"
+];
+
+function startGame(){
+ const value=document.getElementById("players").value;
+ names=value.split(",").map(x=>x.trim()).filter(x=>x);
+ if(names.length<2){
+ alert("Entre au moins deux prénoms !");
+ return;
+ }
+ current=0;
+ document.getElementById("home").style.display="none";
+ document.getElementById("game").style.display="block";
+ showPlayer();
+}
+
+function showPlayer(){
+ document.getElementById("turn").innerText=
+ "C'est au tour de "+names[current]+" de choisir !";
+ document.getElementById("result").innerText="";
+}
+
+function choose(type){
+ let list=type==="action"?actions:truths;
+ let text=list[Math.floor(Math.random()*list.length)];
+ document.getElementById("result").innerText=
+ (type==="action"?"🔥 ACTION : ":"💬 VÉRITÉ : ")+text;
+}
+
+function nextPlayer(){
+ current=(current+1)%names.length;
+ showPlayer();
+}
+
+function back(){
+ document.getElementById("home").style.display="block";
+ document.getElementById("game").style.display="none";
+ document.getElementById("unoGame").style.display="none";
+}
+
+let colors=["🟥","🟦","🟩","🟨"];
+let deck=[];
+let hand=[];
+let top="";
+
+function startUno(){
+ document.getElementById("home").style.display="none";
+ document.getElementById("unoGame").style.display="block";
+ deck=[];
+ hand=[];
+ for(let i=0;i<60;i++){
+  deck.push({color:colors[Math.floor(Math.random()*4)],
+  number:Math.floor(Math.random()*10)});
+ }
+ for(let i=0;i<5;i++) hand.push(deck.pop());
+ top=deck.pop();
+ updateUno();
+}
+
+function updateUno(){
+ document.getElementById("topCard").innerText=top.color+" "+top.number;
+ document.getElementById("hand").innerHTML="";
+ hand.forEach((card,i)=>{
+  let b=document.createElement("button");
+  b.innerText=card.color+" "+card.number;
+  b.onclick=()=>playCard(i);
+  document.getElementById("hand").appendChild(b);
+ });
+ document.getElementById("unoStatus").innerText=
+ "Cartes restantes : "+deck.length+" | Tes cartes : "+hand.length;
+}
+
+function playCard(i){
+ let card=hand[i];
+ if(card.color!==top.color && card.number!==top.number){
+  alert("Cette carte ne correspond pas à la carte du dessus !");
+  return;
+ }
+ top=hand.splice(i,1)[0];
+ if(hand.length===0){
+  alert("BRAVO ! TU AS GAGNÉ ! 🎉");
+  startUno();
+  return;
+ }
+ updateUno();
+}
+
+function drawCard(){
+ if(deck.length===0){
+  alert("La pioche est vide !");
+  return;
+ }
+ hand.push(deck.pop());
+ updateUno();
+}
+</script>
+
+</body>
+</html>
