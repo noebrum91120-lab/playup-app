@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PLAYUP - Jeux entre amis</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: white;
+  font-family: Arial, sans-serif;
+  background-color: #08070d;
+  background-image:
+    linear-gradient(180deg, transparent 48%, #17131e 49%, transparent 52%),
+    linear-gradient(90deg, #17131e 1px, transparent 1px);
+  background-size: 100% 55px, 110px 55px;
+}
+
+header {
+  text-align: center;
+  padding: 35px 10px 15px;
+}
+
+header h1 {
+  font-size: 42px;
+  letter-spacing: 5px;
+  margin: 5px;
+  color: white;
+  text-shadow: 0 0 15px #a000ff;
+}
+
+header p {
+  color: #aaa;
+}
+
+main {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+}
+
+.game {
+  display: block;
+  width: 100%;
+  min-height: 210px;
+  margin: 25px 0;
+  border-radius: 25px;
+  background: #08070d;
+  color: white;
+  font-size: 38px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.uno {
+  border: 3px solid #bd35ff;
+  box-shadow: 0 0 12px #bd35ff,
+              inset 0 0 20px #7800b9;
+  color: #e4aaff;
+}
+
+.action {
+  border: 3px solid #168cff;
+  box-shadow: 0 0 12px #168cff,
+              inset 0 0 15px #168cff;
+  color: #65baff;
+}
+
+.verite {
+  color: #ff4a4a;
+  text-shadow: 0 0 12px red;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+.screen {
+  display: none;
+  text-align: center;
+  padding: 25px 10px;
+}
+
+.screen h2 {
+  font-size: 32px;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 12px;
+  border: 1px solid #777;
+  background: #17131e;
+  color: white;
+  font-size: 17px;
+}
+
+.small-button {
+  padding: 15px 25px;
+  margin: 10px;
+  border: none;
+  border-radius: 12px;
+  background: #8528d8;
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+#player {
+  font-size: 27px;
+  color: white;
+  margin: 25px;
+}
+
+#question {
+  font-size: 23px;
+  margin: 25px 5px;
+}
+
+footer {
+  text-align: center;
+  color: #777;
+  padding: 30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>PLAYUP</h1>
+  <p>LE PLAISIR DE JOUER ENTRE AMIS</p>
+</header>
+
+<main id="home">
+
+<button class="game uno" onclick="openUno()">
+  🃏<br>UNO
+</button>
+
+<button class="game action" onclick="openAction()">
+  ACTION<br>
+  <span class="verite">OU VÉRITÉ</span>
+</button>
+
+</main>
+
+<section class="screen" id="unoScreen">
+  <h2 style="color:#d47aff">🃏 JEU DE CARTES</h2>
+  <p>Notre jeu de cartes arrive bientôt !</p>
+  <button class="small-button" onclick="goHome()">
+    RETOUR
+  </button>
+</section>
+
+<section class="screen" id="actionScreen">
+  <h2>🎯 ACTION OU VÉRITÉ</h2>
+
+  <p>Entre les prénoms des joueurs, séparés par des virgules :</p>
+
+  <input id="names" placeholder="Ex : Emma, Lucas, Adam">
+
+  <button class="small-button" onclick="startGame()">
+    COMMENCER
+  </button>
+
+  <div id="gameArea" style="display:none">
+
+    <p> C'est au tour de :</p>
+
+    <div id="player"></div>
+
+    <button class="small-button"
+      style="background:#087bea"
+      onclick="choose('vérité')">
+      VÉRITÉ
+    </button>
+
+    <button class="small-button"
+      style="background:#e52b38"
+      onclick="choose('action')">
+      ACTION
+    </button>
+
+    <div id="question"></div>
+
+    <button class="small-button"
+      onclick="nextPlayer()">
+      JOUEUR SUIVANT
+    </button>
+
+  </div>
+
+  <button class="small-button" onclick="goHome()">
+    RETOUR À L'ACCUEIL
+  </button>
+</section>
+
+<footer>
+  PLAYUP © 2026
+</footer>
+
+<script>
+let players = [];
+let currentPlayer = "";
+
+const truths = [
+  "Quel est ton jeu préféré ?",
+  "Quelle est ta plus grande passion ?",
+  "Quel est ton meilleur souvenir entre amis ?",
+  "Si tu pouvais voyager, où irais-tu ?",
+  "Quel est ton talent caché ?"
+];
+
+const actions = [
+  "Fais une imitation amusante.",
+  "Chante quelques secondes d'une chanson.",
+  "Raconte une blague.",
+  "Fais une danse drôle pendant 10 secondes.",
+  "Parle avec une voix de robot."
+];
+
+function openUno() {
+  hideAll();
+  document.getElementById("unoScreen").style.display = "block";
+}
+
+function openAction() {
+  hideAll();
+  document.getElementById("actionScreen").style.display = "block";
+}
+
+function hideAll() {
+  document.getElementById("home").style.display = "none";
+  document.getElementById("unoScreen").style.display = "none";
+  document.getElementById("actionScreen").style.display = "none";
+}
+
+function goHome() {
+  hideAll();
+  document.getElementById("home").style.display = "block";
+}
+
+function startGame() {
+  players = document.getElementById("names")
+    .value.split(",")
+    .map(n => n.trim())
+    .filter(n => n.length > 0);
+
+  if (players.length < 2) {
+    alert("Ajoute au moins deux joueurs !");
+    return;
+  }
+
+  document.getElementById("gameArea").style.display = "block";
+  nextPlayer();
+}
+
+function nextPlayer() {
+  currentPlayer =
+    players[Math.floor(Math.random() * players.length)];
+
+  document.getElementById("player").textContent =
+    currentPlayer;
+
+  document.getElementById("question").textContent = "";
+}
+
+function choose(type) {
+  let list = type === "action" ? actions : truths;
+
+  let item = list[Math.floor(Math.random() * list.length)];
+
+  document.getElementById("question").textContent =
+    type.toUpperCase() + " : " + item;
+}
+</script>
+
+</body>
+</html>
